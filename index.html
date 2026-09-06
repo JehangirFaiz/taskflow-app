@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taskflow — Task Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="app">
+    <!-- ===== Sidebar ===== -->
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark">◆</span>
+        <span>Taskflow</span>
+      </div>
+
+      <button class="new-task-btn" id="newTaskBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+        New Task
+      </button>
+
+      <div class="stats-card">
+        <div class="ring-wrap">
+          <svg class="progress-ring" viewBox="0 0 90 90" width="86" height="86">
+            <circle class="ring-track" cx="45" cy="45" r="38"/>
+            <circle class="ring-fill" id="ringFill" cx="45" cy="45" r="38"/>
+          </svg>
+          <div class="ring-label">
+            <span id="ringPercent">0%</span>
+            <small>done</small>
+          </div>
+        </div>
+        <div class="stats-rows">
+          <div class="stat-row"><span class="dot dot-total"></span>Total <b id="statTotal">0</b></div>
+          <div class="stat-row"><span class="dot dot-done"></span>Completed <b id="statDone">0</b></div>
+          <div class="stat-row"><span class="dot dot-overdue"></span>Overdue <b id="statOverdue">0</b></div>
+        </div>
+      </div>
+
+      <nav class="filter-nav">
+        <p class="nav-label">Priority</p>
+        <button class="filter-chip" data-filter-type="priority" data-filter-value="all">
+          <span class="chip-dot all"></span>All tasks
+        </button>
+        <button class="filter-chip" data-filter-type="priority" data-filter-value="high">
+          <span class="chip-dot high"></span>High
+        </button>
+        <button class="filter-chip" data-filter-type="priority" data-filter-value="medium">
+          <span class="chip-dot medium"></span>Medium
+        </button>
+        <button class="filter-chip" data-filter-type="priority" data-filter-value="low">
+          <span class="chip-dot low"></span>Low
+        </button>
+      </nav>
+
+      <nav class="filter-nav" id="categoryNav">
+        <p class="nav-label">Categories</p>
+        <!-- populated by JS -->
+      </nav>
+
+      <div class="sidebar-footer">Developed by <b>Jehangir Faiz</b></div>
+    </aside>
+
+    <!-- ===== Main ===== -->
+    <main class="main">
+      <header class="topbar">
+        <div class="search-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="text" id="searchInput" placeholder="Search tasks…">
+        </div>
+        <div class="view-toggle" id="viewToggle">
+          <button class="view-btn active" data-view="board">Board</button>
+          <button class="view-btn" data-view="list">List</button>
+        </div>
+      </header>
+
+      <!-- Board view -->
+      <div class="board" id="board">
+        <div class="column" data-status="todo">
+          <div class="column-head">
+            <span class="col-title"><span class="col-dot todo"></span>To Do</span>
+            <span class="col-count" id="countTodo">0</span>
+          </div>
+          <div class="column-body" id="colTodo" data-status="todo"></div>
+        </div>
+        <div class="column" data-status="progress">
+          <div class="column-head">
+            <span class="col-title"><span class="col-dot progress"></span>In Progress</span>
+            <span class="col-count" id="countProgress">0</span>
+          </div>
+          <div class="column-body" id="colProgress" data-status="progress"></div>
+        </div>
+        <div class="column" data-status="done">
+          <div class="column-head">
+            <span class="col-title"><span class="col-dot done"></span>Done</span>
+            <span class="col-count" id="countDone">0</span>
+          </div>
+          <div class="column-body" id="colDone" data-status="done"></div>
+        </div>
+      </div>
+
+      <!-- List view -->
+      <div class="list-view" id="listView" hidden></div>
+
+      <p class="empty-state" id="emptyState" hidden>No tasks match your search or filters.</p>
+    </main>
+  </div>
+
+  <!-- ===== Task modal ===== -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-head">
+        <h2 id="modalTitle">New Task</h2>
+        <button class="icon-btn" id="modalClose">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <label class="field-label">Title</label>
+        <input type="text" id="taskTitle" class="field-input" placeholder="e.g. Design the landing page hero section" maxlength="80">
+
+        <label class="field-label">Description</label>
+        <textarea id="taskDesc" class="field-input" rows="3" placeholder="Add more detail (optional)"></textarea>
+
+        <div class="field-row">
+          <div>
+            <label class="field-label">Priority</label>
+            <select id="taskPriority" class="field-input">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Due date</label>
+            <input type="date" id="taskDue" class="field-input">
+          </div>
+        </div>
+
+        <label class="field-label">Category</label>
+        <input type="text" id="taskCategory" class="field-input" placeholder="e.g. Design, Development, Marketing" list="categoryList">
+        <datalist id="categoryList"></datalist>
+
+        <label class="field-label">Subtasks</label>
+        <div class="subtask-list" id="subtaskList"></div>
+        <div class="subtask-add-row">
+          <input type="text" id="subtaskInput" class="field-input" placeholder="Add a subtask and press Enter">
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button class="btn-ghost" id="deleteTaskBtn" hidden>Delete</button>
+        <div class="modal-foot-right">
+          <button class="btn-ghost" id="cancelBtn">Cancel</button>
+          <button class="btn-primary" id="saveTaskBtn">Save Task</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
